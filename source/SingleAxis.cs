@@ -172,13 +172,6 @@ namespace PI.Motion
 
             return Success.Equals(1);
         }
-        public class MoveInput
-        {
-            public bool Connected;
-            public double Coordinate;
-            public int ControllerID;
-            public string Channel;
-        }
         public bool TurnOffServo()
         {
             if (!Connected) return true;
@@ -269,32 +262,6 @@ namespace PI.Motion
             if (MOV(ControllerID, Channel, new double[] { Coordinate }).Equals(0)) return false;
 
             return true;
-        }
-        public void Move(object Input)
-        {
-            if (!Connected) { return; }
-            
-            MoveInput input = (MoveInput)Input;
-
-            double Coordinate = input.Coordinate;
-            int controllerID = input.ControllerID;
-            string channel = input.Channel;
-
-            if ((Coordinate - PositionTolerance) > UpperLimit || (Coordinate + PositionTolerance) < LowerLimit) return;               
-
-            int[] ServoOn = new int[] { 0 };
-
-            if (qSVO(controllerID, channel, ServoOn).Equals(0)) return; //Query Servo status, must be on
-
-            if (ServoOn[0].Equals(0))
-            {
-                if (!Configure()) return;
-                if (qSVO(controllerID, channel, ServoOn).Equals(0)) return;
-
-                if (ServoOn[0].Equals(0)) return;
-            }
-
-            MOV(controllerID, channel, new double[] { Coordinate });
         }
         private bool SetAxisReference(int controllerID, string channel)
         {

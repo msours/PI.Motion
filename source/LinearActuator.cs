@@ -240,33 +240,6 @@ namespace PI.Motion
 
             return true;
         }
-
-        public void Move(object Input)
-        {
-            if (!Connected) { return; }
-            
-            MoveInput input = (MoveInput)Input;
-
-            double Coordinate = input.Coordinate;
-            int controllerID = input.ControllerID;
-            string channel = input.Channel;
-
-            if ((Coordinate - PositionTolerance) > UpperLimit || (Coordinate + PositionTolerance) < LowerLimit) return;
-
-            int[] ServoOn = new int[] { 0 };
-
-            if (qSVO(controllerID, channel, ServoOn).Equals(0)) return; //Query Servo status, must be on
-
-            if (ServoOn[0].Equals(0))
-            {
-                if (!Configure()) return;
-                if (qSVO(controllerID, channel, ServoOn).Equals(0)) return;
-
-                if (ServoOn[0].Equals(0)) return;
-            }
-
-            MOV(controllerID, channel, new double[] { Coordinate });
-        }
         public string getError()
         {
             int Error = GetError(ControllerID);
@@ -278,24 +251,14 @@ namespace PI.Motion
         }
         public bool isMoving(int controllerID, string channel)
         {
-            lock ((object)Connected)
-            {
-                if (!Connected) { return false; }
-            }
-
+            if (!Connected) { return false; }
+            
             Thread.Sleep(50);
 
             int[] ismoving = new int[] { 0 };
             if (IsMoving(controllerID, channel, ismoving).Equals(0)) return false;
 
             return (ismoving[0].Equals(1));
-        }
-        public class MoveInput
-        {
-            public bool Connected;
-            public double Coordinate;
-            public int ControllerID;
-            public string Channel;
         }
     }
 }
